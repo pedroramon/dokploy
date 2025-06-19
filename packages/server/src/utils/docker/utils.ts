@@ -14,6 +14,7 @@ import type { RedisNested } from "../databases/redis";
 import { execAsync, execAsyncRemote } from "../process/execAsync";
 import { spawnAsync } from "../process/spawnAsync";
 import { getRemoteDocker } from "../servers/remote-docker";
+import { MssqlserverNested } from '../databases/mssqlserver';
 
 interface RegistryAuth {
 	username: string;
@@ -431,6 +432,7 @@ export const generateFileMounts = (
 		| MariadbNested
 		| MysqlNested
 		| PostgresNested
+		| MssqlserverNested
 		| RedisNested,
 ) => {
 	const { mounts } = service;

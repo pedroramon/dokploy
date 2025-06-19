@@ -9,11 +9,13 @@ import { mariadb } from "./mariadb";
 import { mongo } from "./mongo";
 import { mysql } from "./mysql";
 import { postgres } from "./postgres";
+import { mssqlserver } from "./mssqlserver";
 import { redis } from "./redis";
 
 export const serviceType = pgEnum("serviceType", [
 	"application",
 	"postgres",
+	"mssqlserver",
 	"mysql",
 	"mariadb",
 	"mongo",
@@ -42,6 +44,9 @@ export const mounts = pgTable("mount", {
 	postgresId: text("postgresId").references(() => postgres.postgresId, {
 		onDelete: "cascade",
 	}),
+	mssqlserverId: text("mssqlserverId").references(() => mssqlserver.mssqlserverId, {
+		onDelete: "cascade",
+	}),
 	mariadbId: text("mariadbId").references(() => mariadb.mariadbId, {
 		onDelete: "cascade",
 	}),
@@ -67,6 +72,10 @@ export const MountssRelations = relations(mounts, ({ one }) => ({
 	postgres: one(postgres, {
 		fields: [mounts.postgresId],
 		references: [postgres.postgresId],
+	}),
+	mssqlserver: one(mssqlserver, {
+		fields: [mounts.mssqlserverId],
+		references: [mssqlserver.mssqlserverId],
 	}),
 	mariadb: one(mariadb, {
 		fields: [mounts.mariadbId],
@@ -103,6 +112,7 @@ const createSchema = createInsertSchema(mounts, {
 		.enum([
 			"application",
 			"postgres",
+			"mssqlserver",
 			"mysql",
 			"mariadb",
 			"mongo",

@@ -10,6 +10,7 @@ import { mariadb } from "./mariadb";
 import { mongo } from "./mongo";
 import { mysql } from "./mysql";
 import { postgres } from "./postgres";
+import { mssqlserver } from "./mssqlserver";
 import { redis } from "./redis";
 
 export const projects = pgTable("project", {
@@ -32,6 +33,7 @@ export const projects = pgTable("project", {
 export const projectRelations = relations(projects, ({ many, one }) => ({
 	mysql: many(mysql),
 	postgres: many(postgres),
+	mssqlserver: many(mssqlserver),
 	mariadb: many(mariadb),
 	applications: many(applications),
 	mongo: many(mongo),

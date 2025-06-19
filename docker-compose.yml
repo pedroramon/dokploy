@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+
+  pg:
+    image: postgres:15
+
+  redis:
+    image: redis

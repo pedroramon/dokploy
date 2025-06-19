@@ -6,6 +6,7 @@ import { ProjectEnvironment } from "@/components/dashboard/projects/project-envi
 import {
 	MariadbIcon,
 	MongodbIcon,
+	MssqlserverIcon,
 	MysqlIcon,
 	PostgresqlIcon,
 	RedisIcon,
@@ -100,13 +101,14 @@ export type Services = {
 	serverId?: string | null;
 	name: string;
 	type:
-		| "mariadb"
-		| "application"
-		| "postgres"
-		| "mysql"
-		| "mongo"
-		| "redis"
-		| "compose";
+	| "mariadb"
+	| "application"
+	| "postgres"
+	| "mssqlserver"
+	| "mysql"
+	| "mongo"
+	| "redis"
+	| "compose";
 	description?: string | null;
 	id: string;
 	createdAt: string;
@@ -150,6 +152,16 @@ export const extractServices = (data: Project | undefined) => {
 			status: item.applicationStatus,
 			description: item.description,
 			serverId: item.serverId,
+		})) || [];
+
+	const mssqlserver: Services[] =
+		data?.mssqlserver.map((item) => ({
+			name: item.name,
+			type: "mssqlserver",
+			id: item.mssqlserverId,
+			createdAt: item.createdAt,
+			status: item.applicationStatus,
+			description: item.description,
 		})) || [];
 
 	const mongo: Services[] =
@@ -205,6 +217,7 @@ export const extractServices = (data: Project | undefined) => {
 		...redis,
 		...mongo,
 		...postgres,
+		...mssqlserver,
 		...mariadb,
 		...compose,
 	);
@@ -268,6 +281,7 @@ const Project = (
 		data?.mongo?.length === 0 &&
 		data?.mysql?.length === 0 &&
 		data?.postgres?.length === 0 &&
+		data?.mssqlserver?.length === 0 &&
 		data?.redis?.length === 0 &&
 		data?.applications?.length === 0 &&
 		data?.compose?.length === 0;
@@ -278,6 +292,7 @@ const Project = (
 	const serviceTypes = [
 		{ value: "application", label: "Application", icon: GlobeIcon },
 		{ value: "postgres", label: "PostgreSQL", icon: PostgresqlIcon },
+		{ value: "mssqlserver", label: "Sql Server", icon: MssqlserverIcon },
 		{ value: "mariadb", label: "MariaDB", icon: MariadbIcon },
 		{ value: "mongo", label: "MongoDB", icon: MongodbIcon },
 		{ value: "mysql", label: "MySQL", icon: MysqlIcon },
@@ -1016,6 +1031,9 @@ const Project = (
 																		<span className="text-sm font-medium text-muted-foreground self-start">
 																			{service.type === "postgres" && (
 																				<PostgresqlIcon className="h-7 w-7" />
+																			)}
+																			{service.type === "mssqlserver" && (
+																				<MssqlserverIcon className="h-7 w-7" />
 																			)}
 																			{service.type === "redis" && (
 																				<RedisIcon className="h-7 w-7" />

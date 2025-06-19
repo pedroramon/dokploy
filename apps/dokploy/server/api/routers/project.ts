@@ -11,6 +11,7 @@ import {
 	mongo,
 	mysql,
 	postgres,
+	mssqlserver,
 	projects,
 	redis,
 } from "@/server/db/schema";
@@ -138,6 +139,9 @@ export const projectRouter = createTRPCRouter({
 						},
 						postgres: {
 							where: buildServiceFilter(postgres.postgresId, accessedServices),
+						},
+						mssqlserver: {
+							where: buildServiceFilter(mssqlserver.mssqlserverId, accessedServices),
 						},
 						redis: {
 							where: buildServiceFilter(redis.redisId, accessedServices),
@@ -336,13 +340,13 @@ export const projectRouter = createTRPCRouter({
 				const targetProject = input.duplicateInSameProject
 					? sourceProject
 					: await createProject(
-							{
-								name: input.name,
-								description: input.description,
-								env: sourceProject.env,
-							},
-							ctx.session.activeOrganizationId,
-						);
+						{
+							name: input.name,
+							description: input.description,
+							env: sourceProject.env,
+						},
+						ctx.session.activeOrganizationId,
+					);
 
 				if (input.includeServices) {
 					const servicesToDuplicate = input.selectedServices || [];
@@ -627,7 +631,7 @@ function buildServiceFilter(
 	return accessedServices.length === 0
 		? sql`false`
 		: sql`${fieldName} IN (${sql.join(
-				accessedServices.map((serviceId) => sql`${serviceId}`),
-				sql`, `,
-			)})`;
+			accessedServices.map((serviceId) => sql`${serviceId}`),
+			sql`, `,
+		)})`;
 }

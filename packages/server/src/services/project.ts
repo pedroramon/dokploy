@@ -6,6 +6,7 @@ import {
 	mongo,
 	mysql,
 	postgres,
+	mssqlserver,
 	projects,
 	redis,
 } from "@dokploy/server/db/schema";
@@ -46,6 +47,7 @@ export const findProjectById = async (projectId: string) => {
 			mongo: true,
 			mysql: true,
 			postgres: true,
+			mssqlserver: true,
 			redis: true,
 			compose: true,
 		},
@@ -102,6 +104,9 @@ export const validUniqueServerAppName = async (appName: string) => {
 			},
 			postgres: {
 				where: eq(postgres.appName, appName),
+			},
+			mssqlserver: {
+				where: eq(mssqlserver.appName, appName),
 			},
 			redis: {
 				where: eq(redis.appName, appName),

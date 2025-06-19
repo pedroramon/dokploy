@@ -19,9 +19,12 @@ import { mariadb } from "./mariadb";
 import { mongo } from "./mongo";
 import { mysql } from "./mysql";
 import { postgres } from "./postgres";
+import { mssqlserver } from "./mssqlserver";
 import { users_temp } from "./user";
+
 export const databaseType = pgEnum("databaseType", [
 	"postgres",
+	"mssqlserver",
 	"mariadb",
 	"mysql",
 	"mongo",
@@ -62,6 +65,12 @@ export const backups = pgTable("backup", {
 			onDelete: "cascade",
 		},
 	),
+	mssqlserverId: text("mssqlserverId").references(
+		(): AnyPgColumn => mssqlserver.mssqlserverId,
+		{
+			onDelete: "cascade",
+		},
+	),
 	mariadbId: text("mariadbId").references(
 		(): AnyPgColumn => mariadb.mariadbId,
 		{
@@ -78,21 +87,21 @@ export const backups = pgTable("backup", {
 	// Only for compose backups
 	metadata: jsonb("metadata").$type<
 		| {
-				postgres?: {
-					databaseUser: string;
-				};
-				mariadb?: {
-					databaseUser: string;
-					databasePassword: string;
-				};
-				mongo?: {
-					databaseUser: string;
-					databasePassword: string;
-				};
-				mysql?: {
-					databaseRootPassword: string;
-				};
-		  }
+			postgres?: {
+				databaseUser: string;
+			};
+			mariadb?: {
+				databaseUser: string;
+				databasePassword: string;
+			};
+			mongo?: {
+				databaseUser: string;
+				databasePassword: string;
+			};
+			mysql?: {
+				databaseRootPassword: string;
+			};
+		}
 		| undefined
 	>(),
 });
@@ -105,6 +114,10 @@ export const backupsRelations = relations(backups, ({ one, many }) => ({
 	postgres: one(postgres, {
 		fields: [backups.postgresId],
 		references: [postgres.postgresId],
+	}),
+	mssqlserver: one(mssqlserver, {
+		fields: [backups.mssqlserverId],
+		references: [mssqlserver.mssqlserverId],
 	}),
 	mariadb: one(mariadb, {
 		fields: [backups.mariadbId],
@@ -137,8 +150,9 @@ const createSchema = createInsertSchema(backups, {
 	database: z.string().min(1),
 	schedule: z.string(),
 	keepLatestCount: z.number().optional(),
-	databaseType: z.enum(["postgres", "mariadb", "mysql", "mongo", "web-server"]),
+	databaseType: z.enum(["postgres", "mssqlserver", "mariadb", "mysql", "mongo", "web-server"]),
 	postgresId: z.string().optional(),
+	mssqlserverId: z.string().optional(),
 	mariadbId: z.string().optional(),
 	mysqlId: z.string().optional(),
 	mongoId: z.string().optional(),
@@ -156,6 +170,7 @@ export const apiCreateBackup = createSchema.pick({
 	mariadbId: true,
 	mysqlId: true,
 	postgresId: true,
+	mssqlserverId: true,
 	mongoId: true,
 	databaseType: true,
 	userId: true,

@@ -22,7 +22,7 @@ export const sendDatabaseBackupNotifications = async ({
 }: {
 	projectName: string;
 	applicationName: string;
-	databaseType: "postgres" | "mysql" | "mongodb" | "mariadb";
+	databaseType: "postgres" | "mssqlserver" | "mysql" | "mongodb" | "mariadb";
 	type: "error" | "success";
 	organizationId: string;
 	errorMessage?: string;

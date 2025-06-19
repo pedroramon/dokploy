@@ -1,6 +1,7 @@
 import {
 	MariadbIcon,
 	MongodbIcon,
+	MssqlserverIcon,
 	MysqlIcon,
 	PostgresqlIcon,
 	RedisIcon,
@@ -39,6 +40,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { slugify } from "@/lib/slug";
 import { api } from "@/utils/api";
+import { mssqlserver } from '@dokploy/server/db/schema';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertTriangle, Database } from "lucide-react";
 import { useState } from "react";
@@ -53,6 +55,7 @@ const dockerImageDefaultPlaceholder: Record<DbType, string> = {
 	mariadb: "mariadb:11",
 	mysql: "mysql:8",
 	postgres: "postgres:15",
+	mssqlserver: "mcr.microsoft.com/mssql/server:2022-latest",
 	redis: "redis:7",
 };
 
@@ -64,6 +67,7 @@ const databasesUserDefaultPlaceholder: Record<
 	mariadb: "mariadb",
 	mysql: "mysql",
 	postgres: "postgres",
+	mssqlserver: "mssqlserver",
 };
 
 const baseDatabaseSchema = z.object({
@@ -89,6 +93,14 @@ const mySchema = z.discriminatedUnion("type", [
 			type: z.literal("postgres"),
 			databaseName: z.string().default("postgres"),
 			databaseUser: z.string().default("postgres"),
+		})
+		.merge(baseDatabaseSchema),
+	z
+		.object({
+			type: z.literal("mssqlserver"),
+			databaseRootPassword: z.string().default(""),
+			databaseName: z.string().min(1, "Database name required"),
+			databaseUser: z.string().default("sqlserver"),
 		})
 		.merge(baseDatabaseSchema),
 	z
@@ -127,6 +139,10 @@ const databasesMap = {
 		icon: <PostgresqlIcon />,
 		label: "PostgreSQL",
 	},
+	mssqlserver: {
+		icon: <MssqlserverIcon />,
+		label: "SQL Server",
+	},
 	mongo: {
 		icon: <MongodbIcon />,
 		label: "MongoDB",
@@ -158,6 +174,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 	const slug = slugify(projectName);
 	const { data: servers } = api.server.withSSHKey.useQuery();
 	const postgresMutation = api.postgres.create.useMutation();
+	const mssqlserverMutation = api.mssqlserver.create.useMutation();
 	const mongoMutation = api.mongo.create.useMutation();
 	const redisMutation = api.redis.create.useMutation();
 	const mariadbMutation = api.mariadb.create.useMutation();
@@ -180,6 +197,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 	const type = form.watch("type");
 	const activeMutation = {
 		postgres: postgresMutation,
+		mssqlserver: mssqlserverMutation,
 		mongo: mongoMutation,
 		redis: redisMutation,
 		mariadb: mariadbMutation,
@@ -206,6 +224,16 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 				databasePassword: data.databasePassword,
 				databaseName: data.databaseName || "postgres",
 
+				databaseUser:
+					data.databaseUser || databasesUserDefaultPlaceholder[data.type],
+				serverId: data.serverId,
+			});
+		} else if (data.type === "mssqlserver") {
+			promise = mssqlserverMutation.mutateAsync({
+				...commonParams,
+				databasePassword: data.databasePassword,
+				databaseName: data.databaseName,
+				databaseRootPassword: data.databaseRootPassword,
 				databaseUser:
 					data.databaseUser || databasesUserDefaultPlaceholder[data.type],
 				serverId: data.serverId,
@@ -442,45 +470,47 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 								/>
 								{(type === "mysql" ||
 									type === "mariadb" ||
+									type === "mssqlserver" ||
 									type === "postgres") && (
-									<FormField
-										control={form.control}
-										name="databaseName"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Database Name</FormLabel>
-												<FormControl>
-													<Input placeholder="Database Name" {...field} />
-												</FormControl>
+										<FormField
+											control={form.control}
+											name="databaseName"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Database Name</FormLabel>
+													<FormControl>
+														<Input placeholder="Database Name" {...field} />
+													</FormControl>
 
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								)}
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									)}
 								{(type === "mysql" ||
 									type === "mariadb" ||
 									type === "postgres" ||
+									type === "mssqlserver" ||
 									type === "mongo") && (
-									<FormField
-										control={form.control}
-										name="databaseUser"
-										render={({ field }) => (
-											<FormItem>
-												<FormLabel>Database User</FormLabel>
-												<FormControl>
-													<Input
-														placeholder={`Default ${databasesUserDefaultPlaceholder[type]}`}
-														autoComplete="off"
-														{...field}
-													/>
-												</FormControl>
+										<FormField
+											control={form.control}
+											name="databaseUser"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Database User</FormLabel>
+													<FormControl>
+														<Input
+															placeholder={`Default ${databasesUserDefaultPlaceholder[type]}`}
+															autoComplete="off"
+															{...field}
+														/>
+													</FormControl>
 
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								)}
+													<FormMessage />
+												</FormItem>
+											)}
+										/>
+									)}
 
 								<FormField
 									control={form.control}
@@ -501,7 +531,7 @@ export const AddDatabase = ({ projectId, projectName }: Props) => {
 										</FormItem>
 									)}
 								/>
-								{(type === "mysql" || type === "mariadb") && (
+								{(type === "mysql" || type === "mariadb" || type === "mssqlserver") && (
 									<FormField
 										control={form.control}
 										name="databaseRootPassword"

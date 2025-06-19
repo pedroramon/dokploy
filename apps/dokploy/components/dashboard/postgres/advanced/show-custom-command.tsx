@@ -32,6 +32,8 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 	const queryMap = {
 		postgres: () =>
 			api.postgres.one.useQuery({ postgresId: id }, { enabled: !!id }),
+		mssqlserver: () =>
+			api.mssqlserver.one.useQuery({ mssqlserverId: id }, { enabled: !!id }),
 		redis: () => api.redis.one.useQuery({ redisId: id }, { enabled: !!id }),
 		mysql: () => api.mysql.one.useQuery({ mysqlId: id }, { enabled: !!id }),
 		mariadb: () =>
@@ -46,6 +48,7 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 
 	const mutationMap = {
 		postgres: () => api.postgres.update.useMutation(),
+		mssqlserver: () => api.mssqlserver.update.useMutation(),
 		redis: () => api.redis.update.useMutation(),
 		mysql: () => api.mysql.update.useMutation(),
 		mariadb: () => api.mariadb.update.useMutation(),
@@ -78,6 +81,7 @@ export const ShowCustomCommand = ({ id, type }: Props) => {
 		await mutateAsync({
 			mongoId: id || "",
 			postgresId: id || "",
+			mssqlserverId: id || "",
 			redisId: id || "",
 			mysqlId: id || "",
 			mariadbId: id || "",

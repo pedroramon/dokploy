@@ -30,6 +30,9 @@ export const createMount = async (input: typeof apiCreateMount._type) => {
 				...(input.serviceType === "postgres" && {
 					postgresId: serviceId,
 				}),
+				...(input.serviceType === "mssqlserver" && {
+					mssqlserverId: serviceId,
+				}),
 				...(input.serviceType === "mariadb" && {
 					mariadbId: serviceId,
 				}),
@@ -212,7 +215,7 @@ export const deleteFileMount = async (mountId: string) => {
 		} else {
 			await removeFileOrDirectory(fullPath);
 		}
-	} catch (_error) {}
+	} catch (_error) { }
 };
 
 export const getBaseFilesPath = async (mountId: string) => {

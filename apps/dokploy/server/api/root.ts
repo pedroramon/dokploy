@@ -23,6 +23,7 @@ import { notificationRouter } from "./routers/notification";
 import { organizationRouter } from "./routers/organization";
 import { portRouter } from "./routers/port";
 import { postgresRouter } from "./routers/postgres";
+import { mssqlserverRouter } from './routers/mssqlserver';
 import { previewDeploymentRouter } from "./routers/preview-deployment";
 import { projectRouter } from "./routers/project";
 import { redirectsRouter } from "./routers/redirects";
@@ -49,6 +50,7 @@ export const appRouter = createTRPCRouter({
 	application: applicationRouter,
 	mysql: mysqlRouter,
 	postgres: postgresRouter,
+	mssqlserver: mssqlserverRouter,
 	redis: redisRouter,
 	mongo: mongoRouter,
 	mariadb: mariadbRouter,
